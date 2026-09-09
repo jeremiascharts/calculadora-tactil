@@ -7568,6 +7568,7 @@ function TI68kEmulatorUIModule(stdlib) {
         stdlib.alert("No ROM / OS loaded !");
     }
     var screen_scaling_ratio = 2; // 2:1 by default
+    var custom_v200_skin = false;
     var screen_enabled = true;
     var contrast = 0x0;
     var black_color = 0x00;
@@ -7836,11 +7837,18 @@ function TI68kEmulatorUIModule(stdlib) {
         // else do nothing.
     };
 
+    function map_coords(coords) {
+        if (!custom_v200_skin) return coords;
+        return coords.split(',').map(function (value, index) {
+            return Math.round(Number(value) * (index % 2 ? 2.64 : 2.5) + (index % 2 ? 44 : 5));
+        }).join(',');
+    }
+
     function create_button(shape, coords, keynumber) {
         var map = document.getElementById(elementid_calcmap);
         var area = document.createElement(elementid_area);
         area.shape = shape;
-        area.coords = coords;
+        area.coords = map_coords(coords);
         area.onmousedown = function () {
             emu.setKey(keynumber, 1);
         }
@@ -7866,7 +7874,7 @@ function TI68kEmulatorUIModule(stdlib) {
         var map = document.getElementById(elementid_calcmap);
         var area = document.createElement(elementid_area);
         area.shape = shape;
-        area.coords = coords;
+        area.coords = map_coords(coords);
         area.onmousedown = function () {
             emu.setONKeyPressed();
         }
@@ -8852,13 +8860,13 @@ function TI68kEmulatorUIModule(stdlib) {
     }
 
     function set_small_v200_skin() {
-        screen_scaling_ratio = 1;
+        screen_scaling_ratio = 2;
 
         // Replace image.
         var oldimg = document.getElementById(elementid_calcimg);
         var newimg = document.createElement('img');
         newimg.setAttribute('id', elementid_calcimg);
-        newimg.setAttribute('src', 'tiv200_skinmap.gif');
+        newimg.setAttribute('src', 'voyage200-custom-skin.png');
         newimg.setAttribute('usemap', '#' + elementid_calcmap);
         //newimg.setAttribute('style', 'position:absolute;top:0px;left:0px;z-index:0');
         newimg.setAttribute('style', oldimg.getAttribute('style'));
@@ -8868,9 +8876,9 @@ function TI68kEmulatorUIModule(stdlib) {
 
         // Move canvas.
         var screen = document.getElementById(elementid_screen);
-        screen.setAttribute('style', 'position:absolute;top:34px;left:70px;z-index:1');
-        screen.setAttribute('width', '240');
-        screen.setAttribute('height', '128');
+        screen.setAttribute('style', 'position:absolute;top:134px;left:180px;width:600px;height:338px;z-index:1');
+        screen.setAttribute('width', '480');
+        screen.setAttribute('height', '256');
 
         var textandbuttons = document.getElementById(elementid_textandbuttons);
         //textandbuttons.setAttribute('style', 'position:relative;top:310px');
@@ -9081,6 +9089,7 @@ function TI68kEmulatorUIModule(stdlib) {
 
     function setCalculatorModel(model) {
         calculator_model = model;
+        custom_v200_skin = model === 8;
         if (screen_scaling_ratio == 1) {
             switch (model) {
                 case 0:

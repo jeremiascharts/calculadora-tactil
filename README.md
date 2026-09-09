@@ -1,6 +1,6 @@
 # TI-68k para iPad
 
-Esta interfaz adapta el emulador TI-68k de TI-Planet a Safari en iPad y teléfono: usa toda la anchura disponible, bloquea el desplazamiento mientras se pulsa una tecla y ofrece un teclado rápido para cálculos numéricos en vertical. Para el teclado completo, gire el teléfono a horizontal.
+Esta interfaz adapta el emulador TI-68k de TI-Planet a Safari en iPad y teléfono: usa toda la anchura disponible, bloquea el desplazamiento mientras se pulsa una tecla y ofrece un teclado rápido para cálculos numéricos en vertical. Para el teclado completo, gire el teléfono a horizontal. Las ROM V200 usan la skin Voyage 200 incluida.
 
 ## Uso
 
