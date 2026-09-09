@@ -620,7 +620,7 @@ function TI68kEmulatorCoreModule(stdlib) {
 // Emulator variables, part 1.
     state.unhandled_count = 0; // number of unhandled instructions encountered
     var main_interval_timer_id = 0; // interval ID of main timer
-    state.main_interval_timer_interval = 11; // interval value in ms of main timer, defaulting to 11 (~90 Hz screen refresh).
+    state.main_interval_timer_interval = 4; // interval value in ms of main timer, favoring touch responsiveness.
     state.tracecount = 0; // number of instructions to trace in console
     state.cycle_count = 0;
     state.overall = 2500;

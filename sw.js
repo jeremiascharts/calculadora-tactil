@@ -1,7 +1,7 @@
-const CACHE_NAME = 'ti68k-touch-v7';
+const CACHE_NAME = 'ti68k-touch-v8';
 const ASSETS = [
   './', './index.html', './manifest.webmanifest', './icon.svg', './icon-180.png',
-  './v13_readable.js?v=resume-safe', './v12rom.js', './v12sav.js', './Ti-92plus.png', './voyage200-custom-skin.png',
+  './v13_readable.js?v=skin-touch', './v12rom.js', './v12sav.js', './Ti-92plus.png', './voyage200-custom-skin.png',
   './ti89_skinmap.gif', './ti89t_skinmap.gif', './ti92p_skinmap.gif', './tiv200_skinmap.gif'
 ];
 

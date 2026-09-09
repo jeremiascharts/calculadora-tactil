@@ -61,7 +61,7 @@
       .scale-control input[type="range"] { grid-column:1 / -1; grid-row:2; }
     }
   </style>
-  <script src="v13_readable.js?v=resume-safe"></script>
+  <script src="v13_readable.js?v=skin-touch"></script>
   <script>var emu=TI68kEmulatorCoreModule(window),ui=TI68kEmulatorUIModule(window),link=TI68kEmulatorLinkModule(window);</script>
   <script src="v12rom.js"></script>
   <script src="v12sav.js"></script>
@@ -133,6 +133,23 @@
       requestAnimationFrame(fitCalculator);
     }
     function stopPageGesture(event) { event.preventDefault(); }
+    function skinHit(area, x, y) {
+      var coords=area.coords.split(',').map(Number);
+      if (area.shape === 'rect') return x >= coords[0] && x <= coords[2] && y >= coords[1] && y <= coords[3];
+      if (area.shape === 'poly') { var inside=false; for (var i=0,j=coords.length-2;i<coords.length;j=i,i+=2) { var xi=coords[i],yi=coords[i+1],xj=coords[j],yj=coords[j+1]; if ((yi>y)!==(yj>y) && x < (xj-xi)*(y-yi)/(yj-yi)+xi) inside=!inside; } return inside; }
+      return false;
+    }
+    function installDirectSkinInput() {
+      var container=document.getElementById('calccontainer'), activeArea=null, activePointer=null;
+      container.addEventListener('pointerdown', function (event) {
+        var image=document.getElementById('calcimg'), rect=image.getBoundingClientRect();
+        var x=(event.clientX-rect.left)*image.naturalWidth/rect.width, y=(event.clientY-rect.top)*image.naturalHeight/rect.height;
+        var areas=Array.prototype.slice.call(document.getElementById('calcmap').areas), hit=areas.find(function (area) { return skinHit(area,x,y); });
+        if (!hit) return;
+        event.preventDefault(); event.stopPropagation(); activeArea=hit; activePointer=event.pointerId; container.setPointerCapture(event.pointerId); hit.onpointerdown({cancelable:false});
+      }, {capture:true,passive:false});
+      ['pointerup','pointercancel'].forEach(function (type) { container.addEventListener(type, function (event) { if (activeArea && event.pointerId===activePointer) { event.preventDefault(); event.stopPropagation(); activeArea.onpointerup({cancelable:false}); activeArea=null; activePointer=null; } }, {capture:true,passive:false}); });
+    }
     function restoreMainCalculator() { window.location.reload(); }
     function wakeEmulator() { if (!document.hidden && document.getElementById('resumeemulator').style.display === 'none') ui.resume_emulator(); }
     function forceAutoScale() { autoScaleControl.checked=false; autoScaleControl.dispatchEvent(new Event('change')); requestAnimationFrame(function () { autoScaleControl.checked=true; autoScaleControl.dispatchEvent(new Event('change')); }); }
@@ -140,7 +157,7 @@
     autoScaleControl.addEventListener('change', function () { autoScale=this.checked; manualScaleControl.disabled=autoScale; try { localStorage.setItem('ti68k-auto-scale', autoScale); } catch (_) {} fitCalculator(); });
     manualScaleControl.addEventListener('input', function () { manualScale=Number(this.value)/100; try { localStorage.setItem('ti68k-manual-scale', manualScale); } catch (_) {} fitCalculator(); });
     window.addEventListener('load', function () {
-      emu.initemu(); updateLayout();
+      emu.initemu(); installDirectSkinInput(); updateLayout();
       new MutationObserver(function () { requestAnimationFrame(fitCalculator); }).observe(document.getElementById('calccontainer'), {childList:true, subtree:true, attributes:true, attributeFilter:['src', 'style', 'width', 'height']});
       if ('serviceWorker' in navigator && location.protocol !== 'file:') navigator.serviceWorker.register('./sw.js');
     });
