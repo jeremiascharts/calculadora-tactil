@@ -135,16 +135,14 @@
       var phoneLandscape=window.matchMedia('(max-height: 500px) and (orientation: landscape)').matches;
       var phonePortrait=window.matchMedia('(max-width: 620px) and (orientation: portrait)').matches;
       var edge=window.matchMedia('(max-width: 620px)').matches ? 2 : 18;
-      var fittedScale=phonePortrait ? (stage.clientWidth-8)/width : phoneLandscape ? stage.clientHeight/height : Math.min((stage.clientWidth-edge)/width, (stage.clientHeight-edge)/height);
+      var fittedScale=phoneLandscape ? stage.clientHeight/height : Math.min((stage.clientWidth-edge)/width, (stage.clientHeight-edge)/height);
       var scale=fittedScale*(autoScale ? 1 : manualScale); box.style.transform='translateX(-50%) scale('+scale+')';
       if (phoneLandscape && autoScale) box.style.transform='translateX(-50%) scale('+stage.clientWidth/width+','+stage.clientHeight/height+')';
-      if (phonePortrait) stage.style.height=height*scale+12+'px';
       box.style.top=(phoneLandscape || phonePortrait) ? (stage.clientHeight-height*scale)/2+'px' : '';
       scaleValue.textContent=autoScale ? 'Auto' : Math.round(manualScale*100)+'%';
     }
     function updateLayout() {
       document.documentElement.style.setProperty('--app-height', (window.visualViewport ? window.visualViewport.height : window.innerHeight) + 'px');
-      document.querySelector('.calculator-stage').style.height='';
       var shouldCompact=window.matchMedia('(max-width: 620px) and (orientation: portrait)').matches;
       if (shouldCompact !== compactLayout) { compactLayout=shouldCompact; ui.setSkin(compactLayout ? 1 : 2); }
       requestAnimationFrame(fitCalculator);
@@ -175,7 +173,7 @@
     manualScaleControl.addEventListener('input', function () { manualScale=Number(this.value)/100; try { localStorage.setItem('ti68k-manual-scale', manualScale); } catch (_) {} fitCalculator(); });
     window.addEventListener('load', function () {
       emu.initemu(); installDirectSkinInput(); updateLayout();
-      if (!window.matchMedia('(max-height: 500px), (max-width: 620px)').matches) document.getElementById('lowerControls').open=true;
+      if (!window.matchMedia('(max-height: 500px) and (orientation: landscape)').matches) document.getElementById('lowerControls').open=true;
       new MutationObserver(function () { requestAnimationFrame(fitCalculator); }).observe(document.getElementById('calccontainer'), {childList:true, subtree:true, attributes:true, attributeFilter:['src', 'style', 'width', 'height']});
       document.querySelector('.calculator-stage').addEventListener('load', fitCalculator, true);
       if ('serviceWorker' in navigator && location.protocol !== 'file:') {
