@@ -22,7 +22,7 @@
     header { display:none; }
     h1 { margin:0; font-size:1.15rem; letter-spacing:-.02em; }
     header p { margin:0; color:var(--muted); font-size:.82rem; }
-    .calculator-stage { position:relative; height:100dvh; overflow:hidden; background:#0e1510; }
+    .calculator-stage { position:relative; height:var(--app-height, 100dvh); overflow:hidden; background:#0e1510; }
     main > :not(.calculator-stage):not(header) { margin-left:14px; margin-right:14px; }
     #calccontainer { position:absolute; left:50%; top:18px; transform-origin:top center; touch-action:none; }
     #screen { position:absolute; z-index:1; margin:0; }
@@ -59,6 +59,7 @@
       .mobile-keypad button[data-key="0"], .mobile-keypad button[data-key="1"] { color:var(--accent); }
       .scale-control { grid-template-columns:1fr auto; }
       .scale-control input[type="range"] { grid-column:1 / -1; grid-row:2; }
+      .calculator-stage #calccontainer { top:0; }
     }
   </style>
   <script src="v13_readable.js?v=skin-touch"></script>
@@ -123,11 +124,13 @@
       var stage=document.querySelector('.calculator-stage'), box=document.getElementById('calccontainer');
       var image=document.getElementById('calcimg');
       var width=image.naturalWidth || (compactLayout ? 619 : 1024), height=image.naturalHeight || (compactLayout ? 316 : 578);
-      var fittedScale=Math.min((stage.clientWidth-18)/width, (stage.clientHeight-36)/height);
+      var edge=window.matchMedia('(max-width: 620px)').matches ? 2 : 18;
+      var fittedScale=Math.min((stage.clientWidth-edge)/width, (stage.clientHeight-edge)/height);
       var scale=fittedScale*(autoScale ? 1 : manualScale); box.style.transform='translateX(-50%) scale('+scale+')';
       scaleValue.textContent=autoScale ? 'Auto' : Math.round(manualScale*100)+'%';
     }
     function updateLayout() {
+      document.documentElement.style.setProperty('--app-height', (window.visualViewport ? window.visualViewport.height : window.innerHeight) + 'px');
       var shouldCompact=window.matchMedia('(max-width: 620px) and (orientation: portrait)').matches;
       if (shouldCompact !== compactLayout) { compactLayout=shouldCompact; ui.setSkin(compactLayout ? 1 : 2); }
       requestAnimationFrame(fitCalculator);
@@ -159,9 +162,11 @@
     window.addEventListener('load', function () {
       emu.initemu(); installDirectSkinInput(); updateLayout();
       new MutationObserver(function () { requestAnimationFrame(fitCalculator); }).observe(document.getElementById('calccontainer'), {childList:true, subtree:true, attributes:true, attributeFilter:['src', 'style', 'width', 'height']});
+      document.querySelector('.calculator-stage').addEventListener('load', fitCalculator, true);
       if ('serviceWorker' in navigator && location.protocol !== 'file:') navigator.serviceWorker.register('./sw.js');
     });
     window.addEventListener('resize', updateLayout);
+    if (window.visualViewport) window.visualViewport.addEventListener('resize', updateLayout);
     window.addEventListener('pageshow', wakeEmulator);
     document.addEventListener('visibilitychange', wakeEmulator);
     document.getElementById('calccontainer').addEventListener('touchstart', stopPageGesture, {capture:true,passive:false});
