@@ -68,7 +68,9 @@
       .menu-button { display:block; }
       .lower-controls { position:fixed; z-index:10; top:52px; left:8px; width:min(320px, calc(100vw - 16px)); max-height:calc(100dvh - 60px); margin:0; padding:8px; overflow:auto; border:1px solid var(--edge); border-radius:12px; background:#17221bf2; }
       .lower-controls:not([open]) { display:none; }
+      .lower-controls[open] { display:flex; flex-direction:column; }
       .lower-controls > summary { display:none; }
+      .lower-controls .controls { order:-1; margin-top:0; }
     }
     @media (max-width:620px) and (orientation:portrait) { .calculator-stage::after { content:none; } }
   </style>
