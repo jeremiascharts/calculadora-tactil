@@ -23,6 +23,7 @@
     h1 { margin:0; font-size:1.15rem; letter-spacing:-.02em; }
     header p { margin:0; color:var(--muted); font-size:.82rem; }
     .calculator-stage { position:relative; height:var(--app-height, 100dvh); overflow:hidden; background:#0e1510; }
+    .rom-change { display:none; position:absolute; z-index:5; top:8px; left:50%; min-height:36px; padding:5px 10px; transform:translateX(-50%); border-radius:9px; background:#17221be8; font-size:.78rem; }
     .lower-controls { margin:12px 14px; }
     .lower-controls > summary { padding:13px 4px; color:var(--muted); cursor:pointer; }
     main > :not(.calculator-stage):not(header) { margin-left:14px; margin-right:14px; }
@@ -63,6 +64,8 @@
       .scale-control input[type="range"] { grid-column:1 / -1; grid-row:2; }
       .calculator-stage #calccontainer { top:0; }
     }
+    @media (max-height:500px) and (orientation:landscape) { .rom-change { display:block; } }
+    @media (max-width:620px) and (orientation:portrait) { .calculator-stage::after { content:none; } }
   </style>
   <script src="v13_readable.js?v=skin-touch"></script>
   <script>var emu=TI68kEmulatorCoreModule(window),ui=TI68kEmulatorUIModule(window),link=TI68kEmulatorLinkModule(window);</script>
@@ -73,6 +76,7 @@
   <main class="app">
     <header><h1>TI-68k</h1><p>Controles táctiles para iPad</p></header>
     <section class="calculator-stage" aria-label="Calculadora emulada">
+      <button class="rom-change" type="button" onclick="document.getElementById('romfile').click()">Cambiar ROM</button>
       <div id="calccontainer"><canvas id="screen"></canvas><img id="calcimg" src="" usemap="#calcmap" alt="Teclado de calculadora TI-92 Plus"><map name="calcmap" id="calcmap"></map></div>
     </section>
     <details id="lowerControls" class="lower-controls"><summary>Controles y ajustes</summary>
@@ -129,15 +133,18 @@
       var image=document.getElementById('calcimg');
       var width=image.naturalWidth || (compactLayout ? 619 : 1024), height=image.naturalHeight || (compactLayout ? 316 : 578);
       var phoneLandscape=window.matchMedia('(max-height: 500px) and (orientation: landscape)').matches;
+      var phonePortrait=window.matchMedia('(max-width: 620px) and (orientation: portrait)').matches;
       var edge=window.matchMedia('(max-width: 620px)').matches ? 2 : 18;
-      var fittedScale=phoneLandscape ? stage.clientHeight/height : Math.min((stage.clientWidth-edge)/width, (stage.clientHeight-edge)/height);
+      var fittedScale=phonePortrait ? (stage.clientWidth-8)/width : phoneLandscape ? stage.clientHeight/height : Math.min((stage.clientWidth-edge)/width, (stage.clientHeight-edge)/height);
       var scale=fittedScale*(autoScale ? 1 : manualScale); box.style.transform='translateX(-50%) scale('+scale+')';
       if (phoneLandscape && autoScale) box.style.transform='translateX(-50%) scale('+stage.clientWidth/width+','+stage.clientHeight/height+')';
-      box.style.top=phoneLandscape ? (stage.clientHeight-height*scale)/2+'px' : '';
+      if (phonePortrait) stage.style.height=height*scale+12+'px';
+      box.style.top=(phoneLandscape || phonePortrait) ? (stage.clientHeight-height*scale)/2+'px' : '';
       scaleValue.textContent=autoScale ? 'Auto' : Math.round(manualScale*100)+'%';
     }
     function updateLayout() {
       document.documentElement.style.setProperty('--app-height', (window.visualViewport ? window.visualViewport.height : window.innerHeight) + 'px');
+      document.querySelector('.calculator-stage').style.height='';
       var shouldCompact=window.matchMedia('(max-width: 620px) and (orientation: portrait)').matches;
       if (shouldCompact !== compactLayout) { compactLayout=shouldCompact; ui.setSkin(compactLayout ? 1 : 2); }
       requestAnimationFrame(fitCalculator);
