@@ -125,7 +125,7 @@
       var width=image.naturalWidth || (compactLayout ? 619 : 1024), height=image.naturalHeight || (compactLayout ? 316 : 578);
       var viewportHeight=(window.visualViewport && window.visualViewport.height) || window.innerHeight;
       var usableHeight=Math.max(160, viewportHeight-stage.getBoundingClientRect().top-24);
-      var fittedScale=Math.min(1, (stage.clientWidth-18)/width, (usableHeight-36)/height);
+      var fittedScale=Math.min((stage.clientWidth-18)/width, (usableHeight-36)/height);
       var scale=fittedScale*(autoScale ? 1 : manualScale); box.style.transform='translateX(-50%) scale('+scale+')';
       stage.style.minHeight=Math.ceil(height*scale+36)+'px';
       scaleValue.textContent=autoScale ? 'Auto' : Math.round(manualScale*100)+'%';
