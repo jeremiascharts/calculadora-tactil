@@ -7,9 +7,11 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="TI-68k">
+  <meta name="description" content="Emulador TI-68k táctil, instalable y adaptable a iPhone, iPad y Android.">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="icon-180.png">
   <title>TI-68k para iPad</title>
-  <!-- The emulator engine and PedroM image remain served by the original GPL project. -->
-  <base href="https://tiplanet.org/emu68k_fork/">
+  <!-- Emulator engine: GPL-2.0-or-later, copyright retained in v13_readable.js. -->
   <style>
     :root { color-scheme: dark; --ink:#edf1e8; --muted:#aab5a9; --surface:#1e2a20; --edge:#384638; --accent:#cfe87a; }
     * { box-sizing:border-box; }
@@ -39,6 +41,10 @@
     .note { margin:14px 4px 0; color:var(--muted); font-size:.82rem; }
     .mobile-keypad { display:none; }
     .keypad-title { margin:14px 0 8px; color:var(--muted); font-size:.82rem; }
+    .scale-control { display:grid; grid-template-columns:auto 1fr auto; align-items:center; gap:10px; margin-top:12px; padding:10px 12px; border:1px solid var(--edge); border-radius:12px; background:#17221b99; color:var(--muted); font-size:.86rem; }
+    .scale-control label { display:flex; align-items:center; gap:7px; white-space:nowrap; }
+    .scale-control input[type="range"] { width:100%; accent-color:var(--accent); }
+    .scale-control output { min-width:3.5em; text-align:right; font-variant-numeric:tabular-nums; color:var(--ink); }
     @media (orientation:portrait) { .calculator-stage::after { content:"Para teclas más grandes, gira el iPad a horizontal."; position:absolute; inset:auto 10px 10px; padding:7px 10px; border-radius:8px; background:#17221bd9; color:var(--muted); font-size:.75rem; text-align:center; pointer-events:none; } }
     @media (max-width:620px) {
       .app { padding-inline:10px; }
@@ -51,6 +57,8 @@
       .mobile-keypad { display:grid; grid-template-columns:repeat(4, 1fr); gap:7px; }
       .mobile-keypad button { min-height:52px; padding:6px; font-size:1.08rem; font-variant-numeric:tabular-nums; }
       .mobile-keypad button[data-key="0"], .mobile-keypad button[data-key="1"] { color:var(--accent); }
+      .scale-control { grid-template-columns:1fr auto; }
+      .scale-control input[type="range"] { grid-column:1 / -1; grid-row:2; }
     }
   </style>
   <script src="v13_readable.js"></script>
@@ -64,9 +72,15 @@
     <section class="calculator-stage" aria-label="Calculadora emulada">
       <div id="calccontainer"><canvas id="screen"></canvas><img id="calcimg" src="" usemap="#calcmap" alt="Teclado de calculadora TI-92 Plus"><map name="calcmap" id="calcmap"></map></div>
     </section>
+    <section class="scale-control" aria-label="Ajuste de tamaño de la calculadora">
+      <label><input id="autoScale" type="checkbox" checked> Ajuste automático</label>
+      <input id="manualScale" type="range" min="50" max="100" value="100" step="5" disabled aria-label="Tamaño manual">
+      <output id="scaleValue" for="manualScale">Auto</output>
+    </section>
     <section class="controls" aria-label="Controles principales">
       <label class="file-label">Cargar ROM / OS<input type="file" accept=".tib,.89u,.v2u,.92u,.rom" onchange="ui.loadrom()" id="romfile"></label>
       <button id="reset_calculator" type="button" onclick="emu.initialize_calculator()">Reiniciar</button>
+      <button id="return_main" type="button" onclick="restoreMainCalculator()">Calculadora principal</button>
       <button id="pauseemulator" type="button" onclick="ui.pause_emulator()">Pausar</button>
       <button id="resumeemulator" type="button" style="display:none" onclick="ui.resume_emulator()">Continuar</button>
       <button type="button" id="pngbutton" onclick="ui.getPNG()">Capturar pantalla</button>
@@ -91,19 +105,30 @@
       <label><input type="radio" id="largeskin" name="skin_type" value="2" checked onclick="ui.setSkin(2)"> Vista grande</label>
     </div></details>
     <a href="" id="downloadfile" style="display:none">Descargar archivo recibido</a><img id="pngimage" src="" alt="Captura de pantalla de la calculadora" style="display:none">
-    <p class="note">Toca directamente las teclas. La versión grande se ajusta automáticamente al ancho disponible; el emulador y PedroM conservan sus créditos y licencia GPL v2 o posterior.</p>
+    <p class="note">Toca directamente las teclas. El ajuste automático aprovecha el ancho y el alto disponibles de cada ROM; el control manual permite reducirla. El emulador y PedroM conservan sus créditos y licencia GPL v2 o posterior.</p>
   </main>
   <script>
     if (emu.apiversion() !== 1) throw new Error('La API del emulador ha cambiado');
     if (typeof rom === 'object') emu.setRom(rom);
     emu.setReset(reset); ui.setEmu(emu); ui.setLink(link); emu.setUI(ui); emu.setLink(link); link.setEmu(emu); link.setUI(ui);
     var compactLayout = false;
+    var autoScale = true;
+    var manualScale = 1;
+    var autoScaleControl = document.getElementById('autoScale');
+    var manualScaleControl = document.getElementById('manualScale');
+    var scaleValue = document.getElementById('scaleValue');
+    try { autoScale = localStorage.getItem('ti68k-auto-scale') !== 'false'; manualScale = Number(localStorage.getItem('ti68k-manual-scale')) || 1; } catch (_) {}
+    autoScaleControl.checked = autoScale; manualScaleControl.value = Math.round(manualScale * 100); manualScaleControl.disabled = autoScale;
     function fitCalculator() {
       var stage=document.querySelector('.calculator-stage'), box=document.getElementById('calccontainer');
       var image=document.getElementById('calcimg');
       var width=image.naturalWidth || (compactLayout ? 619 : 1024), height=image.naturalHeight || (compactLayout ? 316 : 578);
-      var scale=Math.min(1, (stage.clientWidth-18)/width); box.style.transform='translateX(-50%) scale('+scale+')';
+      var viewportHeight=(window.visualViewport && window.visualViewport.height) || window.innerHeight;
+      var usableHeight=Math.max(160, viewportHeight-stage.getBoundingClientRect().top-24);
+      var fittedScale=Math.min(1, (stage.clientWidth-18)/width, (usableHeight-36)/height);
+      var scale=fittedScale*(autoScale ? 1 : manualScale); box.style.transform='translateX(-50%) scale('+scale+')';
       stage.style.minHeight=Math.ceil(height*scale+36)+'px';
+      scaleValue.textContent=autoScale ? 'Auto' : Math.round(manualScale*100)+'%';
     }
     function updateLayout() {
       var shouldCompact=window.matchMedia('(max-width: 620px) and (orientation: portrait)').matches;
@@ -111,7 +136,14 @@
       requestAnimationFrame(fitCalculator);
     }
     function stopPageGesture(event) { event.preventDefault(); }
-    window.addEventListener('load', function () { emu.initemu(); updateLayout(); document.getElementById('calcimg').addEventListener('load', fitCalculator); });
+    function restoreMainCalculator() { window.location.reload(); }
+    autoScaleControl.addEventListener('change', function () { autoScale=this.checked; manualScaleControl.disabled=autoScale; try { localStorage.setItem('ti68k-auto-scale', autoScale); } catch (_) {} fitCalculator(); });
+    manualScaleControl.addEventListener('input', function () { manualScale=Number(this.value)/100; try { localStorage.setItem('ti68k-manual-scale', manualScale); } catch (_) {} fitCalculator(); });
+    window.addEventListener('load', function () {
+      emu.initemu(); updateLayout();
+      new MutationObserver(function () { requestAnimationFrame(fitCalculator); }).observe(document.getElementById('calccontainer'), {childList:true, subtree:true, attributes:true, attributeFilter:['src', 'style', 'width', 'height']});
+      if ('serviceWorker' in navigator && location.protocol !== 'file:') navigator.serviceWorker.register('./sw.js');
+    });
     window.addEventListener('resize', updateLayout);
     document.getElementById('calccontainer').addEventListener('touchstart', stopPageGesture, {capture:true,passive:false});
     document.getElementById('calccontainer').addEventListener('touchmove', stopPageGesture, {capture:true,passive:false});
