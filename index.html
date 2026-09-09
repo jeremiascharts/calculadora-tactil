@@ -171,7 +171,11 @@
       if (!window.matchMedia('(max-height: 500px), (max-width: 620px)').matches) document.getElementById('lowerControls').open=true;
       new MutationObserver(function () { requestAnimationFrame(fitCalculator); }).observe(document.getElementById('calccontainer'), {childList:true, subtree:true, attributes:true, attributeFilter:['src', 'style', 'width', 'height']});
       document.querySelector('.calculator-stage').addEventListener('load', fitCalculator, true);
-      if ('serviceWorker' in navigator && location.protocol !== 'file:') navigator.serviceWorker.register('./sw.js');
+      if ('serviceWorker' in navigator && location.protocol !== 'file:') {
+        var refreshing=false;
+        navigator.serviceWorker.addEventListener('controllerchange', function () { if (!refreshing) { refreshing=true; location.reload(); } });
+        navigator.serviceWorker.register('./sw.js', {updateViaCache:'none'}).then(function (registration) { registration.update(); });
+      }
     });
     window.addEventListener('resize', updateLayout);
     if (window.visualViewport) window.visualViewport.addEventListener('resize', updateLayout);
