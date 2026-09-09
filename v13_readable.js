@@ -7844,7 +7844,7 @@ function TI68kEmulatorUIModule(stdlib) {
     function map_coords(coords) {
         if (!custom_v200_skin) return coords;
         return coords.split(',').map(function (value, index) {
-            return Math.round(Number(value) * (index % 2 ? 2.64 : 2.5) + (index % 2 ? 44 : 5));
+            return Math.round(Number(value) * (index % 2 ? 2.55 : 2.5) + (index % 2 ? 11 : 5));
         }).join(',');
     }
 
@@ -8842,7 +8842,7 @@ function TI68kEmulatorUIModule(stdlib) {
         var oldimg = document.getElementById(elementid_calcimg);
         var newimg = document.createElement('img');
         newimg.setAttribute('id', elementid_calcimg);
-        newimg.setAttribute('src', 'voyage200-custom-skin.png');
+        newimg.setAttribute('src', 'voyage200-pro-skin.png');
         newimg.setAttribute('usemap', '#' + elementid_calcmap);
         //newimg.setAttribute('style', 'position:absolute;top:0px;left:0px;z-index:0');
         newimg.setAttribute('style', oldimg.getAttribute('style'));
@@ -8852,7 +8852,7 @@ function TI68kEmulatorUIModule(stdlib) {
 
         // Move canvas.
         var screen = document.getElementById(elementid_screen);
-        screen.setAttribute('style', 'position:absolute;top:134px;left:180px;width:600px;height:338px;z-index:1');
+        screen.setAttribute('style', 'position:absolute;top:94px;left:177px;width:605px;height:339px;z-index:1');
         screen.setAttribute('width', '480');
         screen.setAttribute('height', '256');
 

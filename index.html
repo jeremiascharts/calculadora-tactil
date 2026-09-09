@@ -23,7 +23,7 @@
     h1 { margin:0; font-size:1.15rem; letter-spacing:-.02em; }
     header p { margin:0; color:var(--muted); font-size:.82rem; }
     .calculator-stage { position:relative; height:var(--app-height, 100dvh); overflow:hidden; background:#0e1510; }
-    .rom-change { display:none; position:absolute; z-index:5; top:8px; left:50%; min-height:36px; padding:5px 10px; transform:translateX(-50%); border-radius:9px; background:#17221be8; font-size:.78rem; }
+    .menu-button { display:none; position:absolute; z-index:5; top:8px; left:8px; min-height:36px; padding:4px 10px; border-radius:9px; background:#17221be8; font-size:1.2rem; line-height:1; }
     .lower-controls { margin:12px 14px; }
     .lower-controls > summary { padding:13px 4px; color:var(--muted); cursor:pointer; }
     main > :not(.calculator-stage):not(header) { margin-left:14px; margin-right:14px; }
@@ -64,10 +64,10 @@
       .scale-control input[type="range"] { grid-column:1 / -1; grid-row:2; }
       .calculator-stage #calccontainer { top:0; }
     }
-    @media (max-height:500px) and (orientation:landscape) { .rom-change { display:block; } }
+    @media (max-height:500px) and (orientation:landscape) { .menu-button { display:block; } }
     @media (max-width:620px) and (orientation:portrait) { .calculator-stage::after { content:none; } }
   </style>
-  <script src="v13_readable.js?v=skin-touch"></script>
+  <script src="v13_readable.js?v=skin-pro"></script>
   <script>var emu=TI68kEmulatorCoreModule(window),ui=TI68kEmulatorUIModule(window),link=TI68kEmulatorLinkModule(window);</script>
   <script src="v12rom.js"></script>
   <script src="v12sav.js"></script>
@@ -76,7 +76,7 @@
   <main class="app">
     <header><h1>TI-68k</h1><p>Controles táctiles para iPad</p></header>
     <section class="calculator-stage" aria-label="Calculadora emulada">
-      <button class="rom-change" type="button" onclick="document.getElementById('romfile').click()">Cambiar ROM</button>
+      <button class="menu-button" type="button" aria-label="Abrir menú" aria-controls="lowerControls" aria-expanded="false" onclick="toggleMenu(this)">☰</button>
       <div id="calccontainer"><canvas id="screen"></canvas><img id="calcimg" src="" usemap="#calcmap" alt="Teclado de calculadora TI-92 Plus"><map name="calcmap" id="calcmap"></map></div>
     </section>
     <details id="lowerControls" class="lower-controls"><summary>Controles y ajustes</summary>
@@ -84,7 +84,7 @@
       <label><input id="autoScale" type="checkbox" checked> Ajuste automático</label>
       <input id="manualScale" type="range" min="50" max="100" value="100" step="5" disabled aria-label="Tamaño manual">
       <output id="scaleValue" for="manualScale">Auto</output>
-    </section>
+    </details>
     <section class="controls" aria-label="Controles principales">
       <label class="file-label">Cargar ROM / OS<input type="file" accept=".tib,.89u,.v2u,.92u,.rom" onchange="loadRomAndEnableAuto()" id="romfile"></label>
       <button id="reset_calculator" type="button" onclick="emu.initialize_calculator()">Reiniciar</button>
@@ -114,7 +114,7 @@
     </div></details>
     <a href="" id="downloadfile" style="display:none">Descargar archivo recibido</a><img id="pngimage" src="" alt="Captura de pantalla de la calculadora" style="display:none">
     <p class="note">Toca directamente las teclas. El ajuste automático aprovecha el ancho y el alto disponibles de cada ROM; el control manual permite reducirla. El emulador y PedroM conservan sus créditos y licencia GPL v2 o posterior.</p>
-    </details>
+    </section>
   </main>
   <script>
     if (emu.apiversion() !== 1) throw new Error('La API del emulador ha cambiado');
@@ -168,6 +168,7 @@
       ['pointerup','pointercancel'].forEach(function (type) { container.addEventListener(type, function (event) { if (activeArea && event.pointerId===activePointer) { event.preventDefault(); event.stopPropagation(); activeArea.onpointerup({cancelable:false}); activeArea=null; activePointer=null; } }, {capture:true,passive:false}); });
     }
     function restoreMainCalculator() { window.location.reload(); }
+    function toggleMenu(button) { var menu=document.getElementById('lowerControls'); menu.open=!menu.open; button.setAttribute('aria-expanded', menu.open); }
     function wakeEmulator() { if (!document.hidden && document.getElementById('resumeemulator').style.display === 'none') ui.resume_emulator(); }
     function forceAutoScale() { autoScaleControl.checked=false; autoScaleControl.dispatchEvent(new Event('change')); requestAnimationFrame(function () { autoScaleControl.checked=true; autoScaleControl.dispatchEvent(new Event('change')); }); }
     function loadRomAndEnableAuto() { ui.loadrom(); setTimeout(forceAutoScale, 250); setTimeout(forceAutoScale, 1000); }
