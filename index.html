@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <meta name="theme-color" content="#17221b">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="TI-68k">
+  <title>TI-68k para iPad</title>
+  <!-- The emulator engine and PedroM image remain served by the original GPL project. -->
+  <base href="https://tiplanet.org/emu68k_fork/">
+  <style>
+    :root { color-scheme: dark; --ink:#edf1e8; --muted:#aab5a9; --surface:#1e2a20; --edge:#384638; --accent:#cfe87a; }
+    * { box-sizing:border-box; }
+    html { background:#17221b; }
+    body { margin:0; min-height:100dvh; overflow-x:hidden; background:radial-gradient(circle at 50% -20%, #344933, #17221b 60%); color:var(--ink); font:500 16px/1.4 -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif; }
+    button, input { font:inherit; }
+    .app { width:min(100%, 72rem); margin:auto; padding:max(12px, env(safe-area-inset-top)) max(14px, env(safe-area-inset-right)) calc(20px + env(safe-area-inset-bottom)) max(14px, env(safe-area-inset-left)); }
+    header { display:flex; align-items:baseline; justify-content:space-between; gap:16px; padding:5px 4px 14px; }
+    h1 { margin:0; font-size:1.15rem; letter-spacing:-.02em; }
+    header p { margin:0; color:var(--muted); font-size:.82rem; }
+    .calculator-stage { position:relative; overflow:hidden; min-height:clamp(315px, 72vw, 550px); border:1px solid var(--edge); border-radius:18px; background:#0e1510; box-shadow:0 18px 45px #07100880; }
+    #calccontainer { position:absolute; left:50%; top:18px; transform-origin:top center; touch-action:none; }
+    #screen { position:absolute; z-index:1; margin:0; }
+    #calcimg { display:block; user-select:none; -webkit-user-select:none; }
+    .controls { display:grid; grid-template-columns:repeat(3, 1fr); gap:8px; margin-top:12px; }
+    button, .file-label { min-height:48px; border:1px solid var(--edge); border-radius:12px; padding:9px 11px; background:var(--surface); color:var(--ink); text-align:center; transition:transform .15s ease, background .15s ease; }
+    button:active, .file-label:active { transform:scale(.97); background:#2d3b2c; }
+    button:focus-visible, .file-label:focus-within { outline:3px solid var(--accent); outline-offset:2px; }
+    .file-label { display:flex; align-items:center; justify-content:center; grid-column:span 2; color:var(--accent); }
+    .file-label input { position:absolute; width:1px; height:1px; opacity:0; }
+    .more { margin-top:12px; border-top:1px solid var(--edge); }
+    summary { padding:13px 4px; color:var(--muted); cursor:pointer; }
+    .panel { display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:8px; padding-bottom:6px; }
+    .panel button, .panel label { font-size:.9rem; }
+    .panel label { display:flex; align-items:center; gap:8px; color:var(--muted); }
+    #downloadfile, #pngimage { max-width:100%; margin-top:10px; }
+    .note { margin:14px 4px 0; color:var(--muted); font-size:.82rem; }
+    @media (orientation:portrait) { .calculator-stage::after { content:"Para teclas más grandes, gira el iPad a horizontal."; position:absolute; inset:auto 10px 10px; padding:7px 10px; border-radius:8px; background:#17221bd9; color:var(--muted); font-size:.75rem; text-align:center; pointer-events:none; } }
+  </style>
+  <script src="v13_readable.js"></script>
+  <script>var emu=TI68kEmulatorCoreModule(window),ui=TI68kEmulatorUIModule(window),link=TI68kEmulatorLinkModule(window);</script>
+  <script src="v12rom.js"></script>
+  <script src="v12sav.js"></script>
+</head>
+<body>
+  <main class="app">
+    <header><h1>TI-68k</h1><p>Controles táctiles para iPad</p></header>
+    <section class="calculator-stage" aria-label="Calculadora emulada">
+      <div id="calccontainer"><canvas id="screen"></canvas><img id="calcimg" src="" usemap="#calcmap" alt="Teclado de calculadora TI-92 Plus"><map name="calcmap" id="calcmap"></map></div>
+    </section>
+    <section class="controls" aria-label="Controles principales">
+      <label class="file-label">Cargar ROM / OS<input type="file" accept=".tib,.89u,.v2u,.92u,.rom" onchange="ui.loadrom()" id="romfile"></label>
+      <button id="reset_calculator" type="button" onclick="emu.initialize_calculator()">Reiniciar</button>
+      <button id="pauseemulator" type="button" onclick="ui.pause_emulator()">Pausar</button>
+      <button id="resumeemulator" type="button" style="display:none" onclick="ui.resume_emulator()">Continuar</button>
+      <button type="button" id="pngbutton" onclick="ui.getPNG()">Capturar pantalla</button>
+    </section>
+    <details class="more"><summary>Archivos, velocidad y opciones</summary><div class="panel">
+      <label class="file-label">Enviar variable<input type="file" onchange="ui.loadfile()" id="file"></label>
+      <button id="receivensButton" type="button" onclick="link.recvfile_ns()">Recibir archivo</button>
+      <button id="downloadFileButton" type="button" onclick="link.getFileData()">Preparar descarga</button>
+      <button id="speedup" type="button" onclick="emu.increase_emulator_speed()">Más rápido</button>
+      <button id="slowdown" type="button" onclick="emu.decrease_emulator_speed()">Más lento</button>
+      <button id="hidebutton" type="button" style="display:none" onclick="ui.pngButtons()">Cerrar captura</button>
+      <label><input type="radio" id="smallskin" name="skin_type" value="1" onclick="ui.setSkin(1)"> Vista normal</label>
+      <label><input type="radio" id="largeskin" name="skin_type" value="2" checked onclick="ui.setSkin(2)"> Vista grande</label>
+    </div></details>
+    <a href="" id="downloadfile" style="display:none">Descargar archivo recibido</a><img id="pngimage" src="" alt="Captura de pantalla de la calculadora" style="display:none">
+    <p class="note">Toca directamente las teclas. La versión grande se ajusta automáticamente al ancho disponible; el emulador y PedroM conservan sus créditos y licencia GPL v2 o posterior.</p>
+  </main>
+  <script>
+    if (emu.apiversion() !== 1) throw new Error('La API del emulador ha cambiado');
+    if (typeof rom === 'object') emu.setRom(rom);
+    emu.setReset(reset); ui.setEmu(emu); ui.setLink(link); emu.setUI(ui); emu.setLink(link); link.setEmu(emu); link.setUI(ui);
+    function fitCalculator() {
+      var stage=document.querySelector('.calculator-stage'), box=document.getElementById('calccontainer');
+      var scale=Math.min(1, (stage.clientWidth-24)/1024); box.style.transform='translateX(-50%) scale('+scale+')';
+      stage.style.minHeight=Math.ceil(578*scale+36)+'px';
+    }
+    function stopPageGesture(event) { event.preventDefault(); }
+    window.addEventListener('load', function () { emu.initemu(); ui.setSkin(2); fitCalculator(); });
+    window.addEventListener('resize', fitCalculator);
+    document.getElementById('calccontainer').addEventListener('touchstart', stopPageGesture, {capture:true,passive:false});
+    document.getElementById('calccontainer').addEventListener('touchmove', stopPageGesture, {capture:true,passive:false});
+    document.getElementById('calccontainer').addEventListener('touchend', stopPageGesture, {capture:true,passive:false});
+  </script>
+</body>
+</html>
