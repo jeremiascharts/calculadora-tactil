@@ -18,11 +18,12 @@
     html { background:#17221b; }
     body { margin:0; min-height:100dvh; overflow-x:hidden; background:radial-gradient(circle at 50% -20%, #344933, #17221b 60%); color:var(--ink); font:500 16px/1.4 -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif; }
     button, input { font:inherit; }
-    .app { width:min(100%, 72rem); margin:auto; padding:max(12px, env(safe-area-inset-top)) max(14px, env(safe-area-inset-right)) calc(20px + env(safe-area-inset-bottom)) max(14px, env(safe-area-inset-left)); }
-    header { display:flex; align-items:baseline; justify-content:space-between; gap:16px; padding:5px 4px 14px; }
+    .app { width:100%; }
+    header { display:none; }
     h1 { margin:0; font-size:1.15rem; letter-spacing:-.02em; }
     header p { margin:0; color:var(--muted); font-size:.82rem; }
-    .calculator-stage { position:relative; overflow:hidden; min-height:clamp(315px, 72vw, 550px); border:1px solid var(--edge); border-radius:18px; background:#0e1510; box-shadow:0 18px 45px #07100880; }
+    .calculator-stage { position:relative; height:100dvh; overflow:hidden; background:#0e1510; }
+    main > :not(.calculator-stage):not(header) { margin-left:14px; margin-right:14px; }
     #calccontainer { position:absolute; left:50%; top:18px; transform-origin:top center; touch-action:none; }
     #screen { position:absolute; z-index:1; margin:0; }
     #calcimg { display:block; user-select:none; -webkit-user-select:none; }
@@ -47,9 +48,8 @@
     .scale-control output { min-width:3.5em; text-align:right; font-variant-numeric:tabular-nums; color:var(--ink); }
     @media (orientation:portrait) { .calculator-stage::after { content:"Para teclas más grandes, gira el iPad a horizontal."; position:absolute; inset:auto 10px 10px; padding:7px 10px; border-radius:8px; background:#17221bd9; color:var(--muted); font-size:.75rem; text-align:center; pointer-events:none; } }
     @media (max-width:620px) {
-      .app { padding-inline:10px; }
       header { padding-inline:2px; }
-      .calculator-stage { border-radius:14px; }
+      main > :not(.calculator-stage):not(header) { margin-left:10px; margin-right:10px; }
       .controls { grid-template-columns:repeat(2, 1fr); gap:7px; }
       .controls .file-label { grid-column:span 2; }
       .controls button, .file-label { min-height:52px; font-size:.94rem; }
@@ -123,9 +123,8 @@
       var stage=document.querySelector('.calculator-stage'), box=document.getElementById('calccontainer');
       var image=document.getElementById('calcimg');
       var width=image.naturalWidth || (compactLayout ? 619 : 1024), height=image.naturalHeight || (compactLayout ? 316 : 578);
-      var fittedScale=(stage.clientWidth-18)/width;
+      var fittedScale=Math.min((stage.clientWidth-18)/width, (stage.clientHeight-36)/height);
       var scale=fittedScale*(autoScale ? 1 : manualScale); box.style.transform='translateX(-50%) scale('+scale+')';
-      stage.style.minHeight=Math.ceil(height*scale+36)+'px';
       scaleValue.textContent=autoScale ? 'Auto' : Math.round(manualScale*100)+'%';
     }
     function updateLayout() {
