@@ -124,9 +124,11 @@
       var stage=document.querySelector('.calculator-stage'), box=document.getElementById('calccontainer');
       var image=document.getElementById('calcimg');
       var width=image.naturalWidth || (compactLayout ? 619 : 1024), height=image.naturalHeight || (compactLayout ? 316 : 578);
+      var phoneLandscape=window.matchMedia('(max-height: 500px) and (orientation: landscape)').matches;
       var edge=window.matchMedia('(max-width: 620px)').matches ? 2 : 18;
-      var fittedScale=Math.min((stage.clientWidth-edge)/width, (stage.clientHeight-edge)/height);
+      var fittedScale=phoneLandscape ? stage.clientHeight*.97/height : Math.min((stage.clientWidth-edge)/width, (stage.clientHeight-edge)/height);
       var scale=fittedScale*(autoScale ? 1 : manualScale); box.style.transform='translateX(-50%) scale('+scale+')';
+      box.style.top=phoneLandscape ? (stage.clientHeight-height*scale)/2+'px' : '';
       scaleValue.textContent=autoScale ? 'Auto' : Math.round(manualScale*100)+'%';
     }
     function updateLayout() {
