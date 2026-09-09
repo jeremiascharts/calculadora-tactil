@@ -126,6 +126,7 @@
     if (typeof rom === 'object') emu.setRom(rom);
     emu.setReset(reset); ui.setEmu(emu); ui.setLink(link); emu.setUI(ui); emu.setLink(link); link.setEmu(emu); link.setUI(ui); ui.set_frames_for_averaging(1);
     var compactLayout = false;
+    var wasPhoneLandscape = false;
     var autoScale = true;
     var manualScale = 1;
     var autoScaleControl = document.getElementById('autoScale');
@@ -150,6 +151,9 @@
     function updateLayout() {
       document.documentElement.style.setProperty('--app-height', (window.visualViewport ? window.visualViewport.height : window.innerHeight) + 'px');
       document.querySelector('.calculator-stage').style.height='';
+      var phoneLandscape=window.matchMedia('(max-height: 500px) and (orientation: landscape)').matches;
+      if (phoneLandscape && !wasPhoneLandscape) { document.getElementById('lowerControls').open=false; document.querySelector('.menu-button').setAttribute('aria-expanded', 'false'); }
+      wasPhoneLandscape=phoneLandscape;
       var shouldCompact=window.matchMedia('(max-width: 620px) and (orientation: portrait)').matches;
       if (shouldCompact !== compactLayout) { compactLayout=shouldCompact; ui.setSkin(compactLayout ? 1 : 2); }
       requestAnimationFrame(fitCalculator);
