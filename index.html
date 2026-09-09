@@ -23,6 +23,8 @@
     h1 { margin:0; font-size:1.15rem; letter-spacing:-.02em; }
     header p { margin:0; color:var(--muted); font-size:.82rem; }
     .calculator-stage { position:relative; height:var(--app-height, 100dvh); overflow:hidden; background:#0e1510; }
+    .lower-controls { margin:12px 14px; }
+    .lower-controls > summary { padding:13px 4px; color:var(--muted); cursor:pointer; }
     main > :not(.calculator-stage):not(header) { margin-left:14px; margin-right:14px; }
     #calccontainer { position:absolute; left:50%; top:18px; transform-origin:top center; touch-action:none; }
     #screen { position:absolute; z-index:1; margin:0; }
@@ -73,6 +75,7 @@
     <section class="calculator-stage" aria-label="Calculadora emulada">
       <div id="calccontainer"><canvas id="screen"></canvas><img id="calcimg" src="" usemap="#calcmap" alt="Teclado de calculadora TI-92 Plus"><map name="calcmap" id="calcmap"></map></div>
     </section>
+    <details id="lowerControls" class="lower-controls"><summary>Controles y ajustes</summary>
     <section class="scale-control" aria-label="Ajuste de tamaño de la calculadora">
       <label><input id="autoScale" type="checkbox" checked> Ajuste automático</label>
       <input id="manualScale" type="range" min="50" max="100" value="100" step="5" disabled aria-label="Tamaño manual">
@@ -107,6 +110,7 @@
     </div></details>
     <a href="" id="downloadfile" style="display:none">Descargar archivo recibido</a><img id="pngimage" src="" alt="Captura de pantalla de la calculadora" style="display:none">
     <p class="note">Toca directamente las teclas. El ajuste automático aprovecha el ancho y el alto disponibles de cada ROM; el control manual permite reducirla. El emulador y PedroM conservan sus créditos y licencia GPL v2 o posterior.</p>
+    </details>
   </main>
   <script>
     if (emu.apiversion() !== 1) throw new Error('La API del emulador ha cambiado');
@@ -126,8 +130,9 @@
       var width=image.naturalWidth || (compactLayout ? 619 : 1024), height=image.naturalHeight || (compactLayout ? 316 : 578);
       var phoneLandscape=window.matchMedia('(max-height: 500px) and (orientation: landscape)').matches;
       var edge=window.matchMedia('(max-width: 620px)').matches ? 2 : 18;
-      var fittedScale=phoneLandscape ? stage.clientHeight*.97/height : Math.min((stage.clientWidth-edge)/width, (stage.clientHeight-edge)/height);
+      var fittedScale=phoneLandscape ? stage.clientHeight/height : Math.min((stage.clientWidth-edge)/width, (stage.clientHeight-edge)/height);
       var scale=fittedScale*(autoScale ? 1 : manualScale); box.style.transform='translateX(-50%) scale('+scale+')';
+      if (phoneLandscape && autoScale) box.style.transform='translateX(-50%) scale('+stage.clientWidth/width+','+stage.clientHeight/height+')';
       box.style.top=phoneLandscape ? (stage.clientHeight-height*scale)/2+'px' : '';
       scaleValue.textContent=autoScale ? 'Auto' : Math.round(manualScale*100)+'%';
     }
@@ -163,6 +168,7 @@
     manualScaleControl.addEventListener('input', function () { manualScale=Number(this.value)/100; try { localStorage.setItem('ti68k-manual-scale', manualScale); } catch (_) {} fitCalculator(); });
     window.addEventListener('load', function () {
       emu.initemu(); installDirectSkinInput(); updateLayout();
+      if (!window.matchMedia('(max-height: 500px), (max-width: 620px)').matches) document.getElementById('lowerControls').open=true;
       new MutationObserver(function () { requestAnimationFrame(fitCalculator); }).observe(document.getElementById('calccontainer'), {childList:true, subtree:true, attributes:true, attributeFilter:['src', 'style', 'width', 'height']});
       document.querySelector('.calculator-stage').addEventListener('load', fitCalculator, true);
       if ('serviceWorker' in navigator && location.protocol !== 'file:') navigator.serviceWorker.register('./sw.js');

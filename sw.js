@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ti68k-touch-v10';
+const CACHE_NAME = 'ti68k-touch-v11';
 const ASSETS = [
   './', './index.html', './manifest.webmanifest', './icon.svg', './icon-180.png',
   './v13_readable.js?v=skin-touch', './v12rom.js', './v12sav.js', './Ti-92plus.png', './voyage200-custom-skin.png',
