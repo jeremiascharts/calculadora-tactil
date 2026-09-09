@@ -64,7 +64,12 @@
       .scale-control input[type="range"] { grid-column:1 / -1; grid-row:2; }
       .calculator-stage #calccontainer { top:0; }
     }
-    @media (max-height:500px) and (orientation:landscape) { .menu-button { display:block; } }
+    @media (max-height:500px) and (orientation:landscape) {
+      .menu-button { display:block; }
+      .lower-controls { position:fixed; z-index:10; top:52px; left:8px; width:min(320px, calc(100vw - 16px)); max-height:calc(100dvh - 60px); margin:0; padding:8px; overflow:auto; border:1px solid var(--edge); border-radius:12px; background:#17221bf2; }
+      .lower-controls:not([open]) { display:none; }
+      .lower-controls > summary { display:none; }
+    }
     @media (max-width:620px) and (orientation:portrait) { .calculator-stage::after { content:none; } }
   </style>
   <script src="v13_readable.js?v=skin-pro"></script>
