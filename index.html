@@ -37,7 +37,21 @@
     .panel label { display:flex; align-items:center; gap:8px; color:var(--muted); }
     #downloadfile, #pngimage { max-width:100%; margin-top:10px; }
     .note { margin:14px 4px 0; color:var(--muted); font-size:.82rem; }
+    .mobile-keypad { display:none; }
+    .keypad-title { margin:14px 0 8px; color:var(--muted); font-size:.82rem; }
     @media (orientation:portrait) { .calculator-stage::after { content:"Para teclas más grandes, gira el iPad a horizontal."; position:absolute; inset:auto 10px 10px; padding:7px 10px; border-radius:8px; background:#17221bd9; color:var(--muted); font-size:.75rem; text-align:center; pointer-events:none; } }
+    @media (max-width:620px) {
+      .app { padding-inline:10px; }
+      header { padding-inline:2px; }
+      .calculator-stage { border-radius:14px; }
+      .controls { grid-template-columns:repeat(2, 1fr); gap:7px; }
+      .controls .file-label { grid-column:span 2; }
+      .controls button, .file-label { min-height:52px; font-size:.94rem; }
+      .panel { grid-template-columns:1fr; }
+      .mobile-keypad { display:grid; grid-template-columns:repeat(4, 1fr); gap:7px; }
+      .mobile-keypad button { min-height:52px; padding:6px; font-size:1.08rem; font-variant-numeric:tabular-nums; }
+      .mobile-keypad button[data-key="0"], .mobile-keypad button[data-key="1"] { color:var(--accent); }
+    }
   </style>
   <script src="v13_readable.js"></script>
   <script>var emu=TI68kEmulatorCoreModule(window),ui=TI68kEmulatorUIModule(window),link=TI68kEmulatorLinkModule(window);</script>
@@ -57,6 +71,15 @@
       <button id="resumeemulator" type="button" style="display:none" onclick="ui.resume_emulator()">Continuar</button>
       <button type="button" id="pngbutton" onclick="ui.getPNG()">Capturar pantalla</button>
     </section>
+    <p class="keypad-title">Teclado rápido para teléfono</p>
+    <section class="mobile-keypad" aria-label="Teclado rápido para teléfono">
+      <button type="button" data-key="0">2nd</button><button type="button" data-key="2">⇧</button><button type="button" data-key="61">Clear</button><button type="button" data-key="70">Esc</button>
+      <button type="button" data-key="29">7</button><button type="button" data-key="30">8</button><button type="button" data-key="31">9</button><button type="button" data-key="63">×</button>
+      <button type="button" data-key="21">4</button><button type="button" data-key="22">5</button><button type="button" data-key="23">6</button><button type="button" data-key="72">−</button>
+      <button type="button" data-key="13">1</button><button type="button" data-key="14">2</button><button type="button" data-key="15">3</button><button type="button" data-key="68">+</button>
+      <button type="button" data-key="4">←</button><button type="button" data-key="7">↓</button><button type="button" data-key="5">↑</button><button type="button" data-key="6">→</button>
+      <button type="button" data-key="77">0</button><button type="button" data-key="78">.</button><button type="button" data-key="64">⌫</button><button type="button" data-key="73">Enter</button>
+    </section>
     <details class="more"><summary>Archivos, velocidad y opciones</summary><div class="panel">
       <label class="file-label">Enviar variable<input type="file" onchange="ui.loadfile()" id="file"></label>
       <button id="receivensButton" type="button" onclick="link.recvfile_ns()">Recibir archivo</button>
@@ -74,17 +97,30 @@
     if (emu.apiversion() !== 1) throw new Error('La API del emulador ha cambiado');
     if (typeof rom === 'object') emu.setRom(rom);
     emu.setReset(reset); ui.setEmu(emu); ui.setLink(link); emu.setUI(ui); emu.setLink(link); link.setEmu(emu); link.setUI(ui);
+    var compactLayout = false;
     function fitCalculator() {
       var stage=document.querySelector('.calculator-stage'), box=document.getElementById('calccontainer');
-      var scale=Math.min(1, (stage.clientWidth-24)/1024); box.style.transform='translateX(-50%) scale('+scale+')';
-      stage.style.minHeight=Math.ceil(578*scale+36)+'px';
+      var image=document.getElementById('calcimg');
+      var width=image.naturalWidth || (compactLayout ? 619 : 1024), height=image.naturalHeight || (compactLayout ? 316 : 578);
+      var scale=Math.min(1, (stage.clientWidth-18)/width); box.style.transform='translateX(-50%) scale('+scale+')';
+      stage.style.minHeight=Math.ceil(height*scale+36)+'px';
+    }
+    function updateLayout() {
+      var shouldCompact=window.matchMedia('(max-width: 620px) and (orientation: portrait)').matches;
+      if (shouldCompact !== compactLayout) { compactLayout=shouldCompact; ui.setSkin(compactLayout ? 1 : 2); }
+      requestAnimationFrame(fitCalculator);
     }
     function stopPageGesture(event) { event.preventDefault(); }
-    window.addEventListener('load', function () { emu.initemu(); ui.setSkin(2); fitCalculator(); });
-    window.addEventListener('resize', fitCalculator);
+    window.addEventListener('load', function () { emu.initemu(); updateLayout(); document.getElementById('calcimg').addEventListener('load', fitCalculator); });
+    window.addEventListener('resize', updateLayout);
     document.getElementById('calccontainer').addEventListener('touchstart', stopPageGesture, {capture:true,passive:false});
     document.getElementById('calccontainer').addEventListener('touchmove', stopPageGesture, {capture:true,passive:false});
     document.getElementById('calccontainer').addEventListener('touchend', stopPageGesture, {capture:true,passive:false});
+    document.querySelectorAll('.mobile-keypad button').forEach(function (button) {
+      var key=Number(button.dataset.key), release=function () { emu.setKey(key, 0); };
+      button.addEventListener('pointerdown', function (event) { event.preventDefault(); emu.setKey(key, 1); });
+      button.addEventListener('pointerup', release); button.addEventListener('pointerleave', release); button.addEventListener('pointercancel', release);
+    });
   </script>
 </body>
 </html>
