@@ -134,7 +134,8 @@
     }
     function stopPageGesture(event) { event.preventDefault(); }
     function restoreMainCalculator() { window.location.reload(); }
-    function loadRomAndEnableAuto() { autoScale=true; autoScaleControl.checked=true; manualScaleControl.disabled=true; try { localStorage.setItem('ti68k-auto-scale', true); } catch (_) {} ui.loadrom(); fitCalculator(); }
+    function forceAutoScale() { autoScaleControl.checked=false; autoScaleControl.dispatchEvent(new Event('change')); requestAnimationFrame(function () { autoScaleControl.checked=true; autoScaleControl.dispatchEvent(new Event('change')); }); }
+    function loadRomAndEnableAuto() { ui.loadrom(); setTimeout(forceAutoScale, 250); setTimeout(forceAutoScale, 1000); }
     autoScaleControl.addEventListener('change', function () { autoScale=this.checked; manualScaleControl.disabled=autoScale; try { localStorage.setItem('ti68k-auto-scale', autoScale); } catch (_) {} fitCalculator(); });
     manualScaleControl.addEventListener('input', function () { manualScale=Number(this.value)/100; try { localStorage.setItem('ti68k-manual-scale', manualScale); } catch (_) {} fitCalculator(); });
     window.addEventListener('load', function () {
