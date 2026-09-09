@@ -78,7 +78,7 @@
       <output id="scaleValue" for="manualScale">Auto</output>
     </section>
     <section class="controls" aria-label="Controles principales">
-      <label class="file-label">Cargar ROM / OS<input type="file" accept=".tib,.89u,.v2u,.92u,.rom" onchange="loadRomAndDisableAuto()" id="romfile"></label>
+      <label class="file-label">Cargar ROM / OS<input type="file" accept=".tib,.89u,.v2u,.92u,.rom" onchange="loadRomAndEnableAuto()" id="romfile"></label>
       <button id="reset_calculator" type="button" onclick="emu.initialize_calculator()">Reiniciar</button>
       <button id="return_main" type="button" onclick="restoreMainCalculator()">Calculadora principal</button>
       <button id="pauseemulator" type="button" onclick="ui.pause_emulator()">Pausar</button>
@@ -134,7 +134,7 @@
     }
     function stopPageGesture(event) { event.preventDefault(); }
     function restoreMainCalculator() { window.location.reload(); }
-    function loadRomAndDisableAuto() { autoScale=false; autoScaleControl.checked=false; manualScaleControl.disabled=false; try { localStorage.setItem('ti68k-auto-scale', false); } catch (_) {} ui.loadrom(); fitCalculator(); }
+    function loadRomAndEnableAuto() { autoScale=true; autoScaleControl.checked=true; manualScaleControl.disabled=true; try { localStorage.setItem('ti68k-auto-scale', true); } catch (_) {} ui.loadrom(); fitCalculator(); }
     autoScaleControl.addEventListener('change', function () { autoScale=this.checked; manualScaleControl.disabled=autoScale; try { localStorage.setItem('ti68k-auto-scale', autoScale); } catch (_) {} fitCalculator(); });
     manualScaleControl.addEventListener('input', function () { manualScale=Number(this.value)/100; try { localStorage.setItem('ti68k-manual-scale', manualScale); } catch (_) {} fitCalculator(); });
     window.addEventListener('load', function () {
