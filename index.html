@@ -138,11 +138,13 @@
       var fittedScale=phoneLandscape ? stage.clientHeight/height : Math.min((stage.clientWidth-edge)/width, (stage.clientHeight-edge)/height);
       var scale=fittedScale*(autoScale ? 1 : manualScale); box.style.transform='translateX(-50%) scale('+scale+')';
       if (phoneLandscape && autoScale) box.style.transform='translateX(-50%) scale('+stage.clientWidth/width+','+stage.clientHeight/height+')';
-      box.style.top=(phoneLandscape || phonePortrait) ? (stage.clientHeight-height*scale)/2+'px' : '';
+      if (phonePortrait) stage.style.height=(window.visualViewport ? window.visualViewport.height : window.innerHeight)/2+'px';
+      box.style.top=phoneLandscape ? (stage.clientHeight-height*scale)/2+'px' : phonePortrait ? stage.clientHeight-height*scale+'px' : '';
       scaleValue.textContent=autoScale ? 'Auto' : Math.round(manualScale*100)+'%';
     }
     function updateLayout() {
       document.documentElement.style.setProperty('--app-height', (window.visualViewport ? window.visualViewport.height : window.innerHeight) + 'px');
+      document.querySelector('.calculator-stage').style.height='';
       var shouldCompact=window.matchMedia('(max-width: 620px) and (orientation: portrait)').matches;
       if (shouldCompact !== compactLayout) { compactLayout=shouldCompact; ui.setSkin(compactLayout ? 1 : 2); }
       requestAnimationFrame(fitCalculator);
