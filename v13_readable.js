@@ -4857,7 +4857,11 @@ function TI68kEmulatorCoreModule(stdlib) {
      }*/
 
     function emu_main_loop() {
-        if (state.unhandled_count >= 10) return;
+        if (state.unhandled_count >= 10) {
+            state.unhandled_count = 0;
+            initialize_calculator();
+            return;
+        }
 
         var starttime = (new Date).getTime();
         var started = false;
@@ -6385,7 +6389,7 @@ function TI68kEmulatorCoreModule(stdlib) {
     }
 
     function resume_emulator() {
-        // Is that enough ?
+        stdlib.clearInterval(main_interval_timer_id);
         main_interval_timer_id = stdlib.setInterval(emu_main_loop, state.main_interval_timer_interval);
     }
 

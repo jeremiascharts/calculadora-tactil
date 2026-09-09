@@ -61,7 +61,7 @@
       .scale-control input[type="range"] { grid-column:1 / -1; grid-row:2; }
     }
   </style>
-  <script src="v13_readable.js?v=input-fast"></script>
+  <script src="v13_readable.js?v=resume-safe"></script>
   <script>var emu=TI68kEmulatorCoreModule(window),ui=TI68kEmulatorUIModule(window),link=TI68kEmulatorLinkModule(window);</script>
   <script src="v12rom.js"></script>
   <script src="v12sav.js"></script>
@@ -134,6 +134,7 @@
     }
     function stopPageGesture(event) { event.preventDefault(); }
     function restoreMainCalculator() { window.location.reload(); }
+    function wakeEmulator() { if (!document.hidden && document.getElementById('resumeemulator').style.display === 'none') ui.resume_emulator(); }
     function forceAutoScale() { autoScaleControl.checked=false; autoScaleControl.dispatchEvent(new Event('change')); requestAnimationFrame(function () { autoScaleControl.checked=true; autoScaleControl.dispatchEvent(new Event('change')); }); }
     function loadRomAndEnableAuto() { ui.loadrom(); setTimeout(forceAutoScale, 250); setTimeout(forceAutoScale, 1000); }
     autoScaleControl.addEventListener('change', function () { autoScale=this.checked; manualScaleControl.disabled=autoScale; try { localStorage.setItem('ti68k-auto-scale', autoScale); } catch (_) {} fitCalculator(); });
@@ -144,6 +145,8 @@
       if ('serviceWorker' in navigator && location.protocol !== 'file:') navigator.serviceWorker.register('./sw.js');
     });
     window.addEventListener('resize', updateLayout);
+    window.addEventListener('pageshow', wakeEmulator);
+    document.addEventListener('visibilitychange', wakeEmulator);
     document.getElementById('calccontainer').addEventListener('touchstart', stopPageGesture, {capture:true,passive:false});
     document.getElementById('calccontainer').addEventListener('touchmove', stopPageGesture, {capture:true,passive:false});
     document.getElementById('calccontainer').addEventListener('touchend', stopPageGesture, {capture:true,passive:false});
