@@ -61,7 +61,7 @@
       .scale-control input[type="range"] { grid-column:1 / -1; grid-row:2; }
     }
   </style>
-  <script src="v13_readable.js?v=custom-v200"></script>
+  <script src="v13_readable.js?v=input-fast"></script>
   <script>var emu=TI68kEmulatorCoreModule(window),ui=TI68kEmulatorUIModule(window),link=TI68kEmulatorLinkModule(window);</script>
   <script src="v12rom.js"></script>
   <script src="v12sav.js"></script>
@@ -110,7 +110,7 @@
   <script>
     if (emu.apiversion() !== 1) throw new Error('La API del emulador ha cambiado');
     if (typeof rom === 'object') emu.setRom(rom);
-    emu.setReset(reset); ui.setEmu(emu); ui.setLink(link); emu.setUI(ui); emu.setLink(link); link.setEmu(emu); link.setUI(ui);
+    emu.setReset(reset); ui.setEmu(emu); ui.setLink(link); emu.setUI(ui); emu.setLink(link); link.setEmu(emu); link.setUI(ui); ui.set_frames_for_averaging(1);
     var compactLayout = false;
     var autoScale = true;
     var manualScale = 1;

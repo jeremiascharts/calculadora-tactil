@@ -7849,24 +7849,10 @@ function TI68kEmulatorUIModule(stdlib) {
         var area = document.createElement(elementid_area);
         area.shape = shape;
         area.coords = map_coords(coords);
-        area.onmousedown = function () {
-            emu.setKey(keynumber, 1);
-        }
-        area.ontouchstart = function () {
-            emu.setKey(keynumber, 1);
-        }
-        area.onmouseup = function () {
-            emu.setKey(keynumber, 0);
-        }
-        area.ontouchend = function () {
-            emu.setKey(keynumber, 0);
-        }
-        area.ontouchleave = function () {
-            emu.setKey(keynumber, 0);
-        }
-        area.ontouchcancel = function () {
-            emu.setKey(keynumber, 0);
-        }
+        var press = function (event) { if (event && event.cancelable) event.preventDefault(); emu.setKey(keynumber, 1); };
+        var release = function (event) { if (event && event.cancelable) event.preventDefault(); emu.setKey(keynumber, 0); };
+        area.onpointerdown = area.onmousedown = area.ontouchstart = press;
+        area.onpointerup = area.onpointerleave = area.onpointercancel = area.onmouseup = area.ontouchend = area.ontouchleave = area.ontouchcancel = release;
         map.appendChild(area);
     }
 
@@ -7875,24 +7861,10 @@ function TI68kEmulatorUIModule(stdlib) {
         var area = document.createElement(elementid_area);
         area.shape = shape;
         area.coords = map_coords(coords);
-        area.onmousedown = function () {
-            emu.setONKeyPressed();
-        }
-        area.ontouchstart = function () {
-            emu.setONKeyPressed();
-        }
-        area.onmouseup = function () {
-            emu.setONKeyReleased();
-        }
-        area.ontouchend = function () {
-            emu.setONKeyReleased();
-        }
-        area.ontouchleave = function () {
-            emu.setONKeyReleased();
-        }
-        area.ontouchcancel = function () {
-            emu.setONKeyReleased();
-        }
+        var press = function (event) { if (event && event.cancelable) event.preventDefault(); emu.setONKeyPressed(); };
+        var release = function (event) { if (event && event.cancelable) event.preventDefault(); emu.setONKeyReleased(); };
+        area.onpointerdown = area.onmousedown = area.ontouchstart = press;
+        area.onpointerup = area.onpointerleave = area.onpointercancel = area.onmouseup = area.ontouchend = area.ontouchleave = area.ontouchcancel = release;
         map.appendChild(area);
     }
 
