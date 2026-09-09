@@ -153,6 +153,7 @@
       document.querySelector('.calculator-stage').style.height='';
       var phoneLandscape=window.matchMedia('(max-height: 500px) and (orientation: landscape)').matches;
       if (phoneLandscape && !wasPhoneLandscape) { document.getElementById('lowerControls').open=false; document.querySelector('.menu-button').setAttribute('aria-expanded', 'false'); }
+      if (!phoneLandscape && wasPhoneLandscape) document.getElementById('lowerControls').open=true;
       wasPhoneLandscape=phoneLandscape;
       var shouldCompact=window.matchMedia('(max-width: 620px) and (orientation: portrait)').matches;
       if (shouldCompact !== compactLayout) { compactLayout=shouldCompact; ui.setSkin(compactLayout ? 1 : 2); }
